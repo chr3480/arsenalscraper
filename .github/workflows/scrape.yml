@@ -1,0 +1,52 @@
+name: Scrape Arsenal.dk
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      prime_only:
+        description: "Mark current posts as seen without sending Discord notifications"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: arsenal-discord-scraper
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Scrape Arsenal.dk
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PRIME_ONLY: ${{ github.event.inputs.prime_only == 'true' && '1' || '0' }}
+        run: python -m arsenal_scraper.scraper
+
+      - name: Commit updated scraper state
+        run: |
+          if git diff --quiet -- data/seen_posts.json; then
+            echo "No state changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/seen_posts.json
+          git commit -m "Update seen Arsenal.dk posts"
+          git push

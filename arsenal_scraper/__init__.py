@@ -1,0 +1,1 @@
+"""Arsenal.dk Discord scraper."""
