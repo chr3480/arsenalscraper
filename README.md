@@ -17,6 +17,7 @@ Cloud scraper for Arsenal.dk. It checks both "Nyheder fra fanklubben" and "Nyhed
 3. Add a repository secret named `DISCORD_WEBHOOK_URL`.
 4. Enable GitHub Actions if GitHub asks.
 5. Optional: run the workflow manually once with `prime_only=true`.
+6. To verify Discord immediately, run the workflow manually with `send_test=true`.
 
 The scheduled workflow runs on UTC time. GitHub's shortest supported schedule interval is five minutes, but runs can be delayed during GitHub Actions load spikes.
 

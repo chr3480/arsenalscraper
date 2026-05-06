@@ -184,6 +184,19 @@ def build_discord_payload(post: Post) -> dict[str, object]:
     }
 
 
+def build_test_payload() -> dict[str, object]:
+    return {
+        "username": "Arsenal.dk",
+        "embeds": [
+            {
+                "title": "Arsenal.dk scraper test",
+                "description": "Testbesked: Discord webhook virker.",
+                "color": 0xDB0007,
+            }
+        ],
+    }
+
+
 def fetch_url(url: str) -> str:
     req = request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
@@ -247,13 +260,23 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Scrape Arsenal.dk and notify Discord about new posts.")
     parser.add_argument("--state", default=str(DEFAULT_STATE_PATH), help="Path to seen posts state JSON.")
     parser.add_argument("--prime-only", action="store_true", help="Mark current posts as seen without notifying.")
+    parser.add_argument("--send-test", action="store_true", help="Send one Discord test notification and exit.")
     args = parser.parse_args(argv)
+
+    webhook_url = os.getenv("DISCORD_WEBHOOK_URL")
+    send_test = args.send_test or os.getenv("SEND_TEST") == "1"
+    if send_test:
+        if not webhook_url:
+            raise RuntimeError("DISCORD_WEBHOOK_URL is required when SEND_TEST=1")
+        send_discord_webhook(webhook_url, build_test_payload())
+        print("Sent Discord test notification.")
+        return 0
 
     prime_only = args.prime_only or os.getenv("PRIME_ONLY") == "1"
     result = run(
         archive_urls=ARCHIVE_URLS,
         state_path=Path(args.state),
-        webhook_url=os.getenv("DISCORD_WEBHOOK_URL"),
+        webhook_url=webhook_url,
         prime_only=prime_only,
     )
     print(

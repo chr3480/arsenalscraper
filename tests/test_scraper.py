@@ -6,6 +6,7 @@ from pathlib import Path
 from arsenal_scraper.scraper import (
     Post,
     build_discord_payload,
+    build_test_payload,
     find_new_posts,
     load_state,
     parse_posts,
@@ -87,6 +88,12 @@ class ScraperTests(unittest.TestCase):
                 {"name": "Dato", "value": "6. maj 2026", "inline": True},
             ],
         )
+
+    def test_build_test_payload_is_clearly_marked(self):
+        payload = build_test_payload()
+
+        self.assertEqual(payload["embeds"][0]["title"], "Arsenal.dk scraper test")
+        self.assertIn("webhook virker", payload["embeds"][0]["description"])
 
     def test_run_sends_only_new_posts_and_updates_state(self):
         state_path = Path(self._tmpdir()) / "seen_posts.json"

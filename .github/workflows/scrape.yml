@@ -9,6 +9,10 @@ on:
         description: "Mark current posts as seen without sending Discord notifications"
         required: false
         default: "false"
+      send_test:
+        description: "Send one Discord test message instead of scraping"
+        required: false
+        default: "false"
 
 permissions:
   contents: write
@@ -36,6 +40,7 @@ jobs:
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
           PRIME_ONLY: ${{ github.event.inputs.prime_only == 'true' && '1' || '0' }}
+          SEND_TEST: ${{ github.event.inputs.send_test == 'true' && '1' || '0' }}
         run: python -m arsenal_scraper.scraper
 
       - name: Commit updated scraper state
