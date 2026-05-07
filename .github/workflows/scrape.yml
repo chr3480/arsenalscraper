@@ -2,7 +2,7 @@ name: Scrape Arsenal.dk
 
 on:
   schedule:
-    - cron: "*/20 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
       prime_only:
